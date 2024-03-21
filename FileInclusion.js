@@ -1,9 +1,3 @@
-let STRING = '*/'
-/*
-Current code constrained to:
- -> '/*' must be in new Line
- -> after `${STRING}` move to next line
-*/
 class FileInclusion {
 
     constructor() {
