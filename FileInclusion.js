@@ -64,23 +64,24 @@ class FileInclusion {
         }
         let importArr = importLine.split('import ');
         for (let ele of importArr) {
-            let startIndex,lastIndex;
-            if(ele.includes('"')){
+            let startIndex, lastIndex;
+            if (ele.includes('"')) {
                 startIndex = ele.indexOf('"');
                 lastIndex = ele.lastIndexOf('"');
             }
-            else{
-            startIndex = ele.indexOf("'");
-            lastIndex = ele.lastIndexOf("'");}
+            else {
+                startIndex = ele.indexOf("'");
+                lastIndex = ele.lastIndexOf("'");
+            }
             let path = ele.slice(startIndex + 1, lastIndex);
             if (path.length) {
                 this.readFile(path, fileArr);
             }
             let restStr = ele.replace(path, '');
-            if(ele.includes('"')){
+            if (ele.includes('"')) {
                 restStr = restStr.replaceAll('"', '');
             }
-            else{
+            else {
                 restStr = restStr.replaceAll("'", '');
             }
             if (restStr[0] === ';') {
@@ -96,15 +97,16 @@ class FileInclusion {
         let commentStack = stack;
         if (line.includes('/*') && commentStack.length === 0) {
             if (line.includes('*/')) {
-                this.validateLine(commentStack,line.slice(0,line.indexOf('/*')),fileArr);
+                this.validateLine(commentStack, line.slice(0, line.indexOf('/*')), fileArr);
                 this.fs.appendFileSync(this.destinationFile, (line.slice(line.indexOf('/*'), line.indexOf('*/') + 2)));
-                this.validateLine(commentStack,line.slice(line.indexOf('*/')+2),fileArr);
+                this.validateLine(commentStack, line.slice(line.indexOf('*/') + 2), fileArr);
             }
             else {
                 let commentStr = line.slice(line.indexOf('/*'));
                 line = line.slice(0, line.indexOf('/*'));
-                if(line.trim().length){
-                this.validateLine(commentStack, line, fileArr);}
+                if (line.trim().length) {
+                    this.validateLine(commentStack, line, fileArr);
+                }
                 this.fs.appendFileSync(this.destinationFile, (commentStr));
                 commentStack?.push('/*');
             }
@@ -113,8 +115,9 @@ class FileInclusion {
             this.fs.appendFileSync(this.destinationFile, (line.slice(0, line.indexOf('*/') + 2)));
             line = line?.slice(line.indexOf('*/') + 2);
             commentStack?.pop();
-            if(line.trim().length){
-            return this.validateLine(commentStack, line, fileArr);}
+            if (line.trim().length) {
+                return this.validateLine(commentStack, line, fileArr);
+            }
         }
         else if (commentStack.length) {
             this.fs.appendFileSync(this.destinationFile, (originalLine));
@@ -129,7 +132,7 @@ class FileInclusion {
                     this.importFile(line, fileArr);
                 }
                 else {
-                    if (line[importIndex - 1] !== '/' && line[importIndex - 2] !== '/') {
+                    if (!line.slice(0, importIndex).includes('//')) {
                         this.fs.appendFileSync(this.destinationFile, (line.slice(0, importIndex)) + '\n');
                         this.importFile(line.slice(importIndex), fileArr);
                     }
@@ -147,9 +150,10 @@ class FileInclusion {
 
     readFile = (filepath, fileArr) => {
         let commentStack = [];
-        let  fileArray = [...fileArr];
+        let fileArray = [...fileArr];
         if (!(fileArray?.includes(filepath))) {
             fileArray?.push(filepath);
+            //console.log(filepath,fileArray);
             let fileDataArr = this.getFileDataArr(filepath);
             for (let index = 0; index < fileDataArr?.length; index++) {
                 this.validateLine(commentStack, fileDataArr[index], fileArray);
